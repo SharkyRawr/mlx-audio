@@ -3,7 +3,7 @@ import inspect
 import os
 import sys
 from os import PathLike
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Sequence, Tuple, Union
 
 import mlx.core as mx
 import mlx.nn as nn
@@ -449,7 +449,7 @@ def generate_audio(
         traceback.print_exc()
 
 
-def parse_args():
+def parse_args(argv: Optional[Sequence[str]] = None):
     parser = argparse.ArgumentParser(description="Generate audio from text using TTS.")
     parser.add_argument(
         "--model",
@@ -483,9 +483,11 @@ def parse_args():
     )
     parser.add_argument(
         "--instruct",
+        "--instruction",
+        dest="instruct",
         type=str,
         default=None,
-        help="Instruction for CustomVoice (emotion/style) or VoiceDesign (voice description)",
+        help="Instruction for CustomVoice (emotion/style) or VoiceDesign (voice description). Alias: --instruction.",
     )
     parser.add_argument(
         "--exaggeration",
@@ -495,9 +497,11 @@ def parse_args():
     )
     parser.add_argument(
         "--cfg_scale",
+        "--cfg-scale",
+        dest="cfg_scale",
         type=float,
         default=None,
-        help="Classifier-free guidance scale. Defaults to the model configuration.",
+        help="Classifier-free guidance scale. Defaults to the model configuration. Alias: --cfg-scale.",
     )
     parser.add_argument(
         "--ddpm_steps",
@@ -564,17 +568,21 @@ def parse_args():
     )
     parser.add_argument(
         "--ref_audio",
+        "--ref-audio",
+        dest="ref_audio",
         type=str,
         action="append",
         default=None,
-        help="Path to reference audio. Repeat for multiple references.",
+        help="Path to reference audio. Repeat for multiple references. Alias: --ref-audio.",
     )
     parser.add_argument(
         "--ref_text",
+        "--ref-text",
+        dest="ref_text",
         type=str,
         action="append",
         default=None,
-        help="Caption for reference audio. Repeat to match repeated --ref_audio.",
+        help="Caption for reference audio. Repeat to match repeated --ref_audio/--ref-audio.",
     )
     parser.add_argument(
         "--stt_model",
@@ -627,7 +635,7 @@ def parse_args():
         help="Save streamed audio to a file. Requires --stream.",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.save and not args.stream:
         parser.error("--save requires --stream")
