@@ -6,7 +6,7 @@ from mlx_audio.registry import SUPPORTED_MODEL_TYPES
 from mlx_audio.tts.generate import parse_args
 from mlx_audio.tts.models.breeze_tts import Model
 from mlx_audio.tts.utils import MODEL_REMAPPING, get_model_and_args
-from mlx_audio.utils import get_model_category, get_model_name_parts
+from mlx_audio.utils import get_model_category, get_model_class, get_model_name_parts
 
 
 def _parse(*options: str):
@@ -72,3 +72,24 @@ def test_breeze_publisher_repository_is_classified_as_tts():
     parts = get_model_name_parts("BreezeBlue/breeze-tts-2")
 
     assert get_model_category("breeze", parts) == "tts"
+
+
+@pytest.mark.parametrize(
+    ("alias", "model_name"),
+    [
+        ("moss_tts_delay", ["OpenMOSS-Team", "MOSS-TTSD-v1.0"]),
+        ("moss_tts_local", ["OpenMOSS-Team", "MOSS-TTS"]),
+    ],
+)
+def test_moss_aliases_keep_returned_type_with_name_hints(alias, model_name):
+    from mlx_audio.tts.models.moss_tts import Model as MossModel
+
+    module, model_type = get_model_class(
+        model_type=alias,
+        model_name=model_name,
+        category="tts",
+        model_remapping=MODEL_REMAPPING,
+    )
+
+    assert model_type == alias
+    assert module.Model is MossModel

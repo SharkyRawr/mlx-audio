@@ -297,7 +297,16 @@ def get_model_class(
             if part in model_remapping:
                 model_type = model_remapping[part]
                 break
-    if model_type == original_model_type and model_type_mapped is not None:
+    # Breeze's publisher config uses ``model_type=breeze`` while its model
+    # package is named ``breeze_tts``.  Apply that family mapping even when a
+    # caller supplied a non-empty hint list that does not contain the alias.
+    # Other remapped families intentionally retain their historical return
+    # value when hints are present (for example, MOSS reports
+    # ``moss_tts_delay`` while importing the shared ``moss_tts`` module).
+    if model_type == original_model_type and model_type_mapped is not None and (
+        model_name is None
+        or original_model_type in {"breeze", "breeze-tts", "breeze_tts"}
+    ):
         model_type = model_type_mapped
 
     try:
